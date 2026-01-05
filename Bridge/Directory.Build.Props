@@ -7,7 +7,5 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
         <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
-        <BaseOutputPath>$(ArtifactsPath)\bin\</BaseOutputPath>
-        <BaseIntermediateOutputPath>$(ArtifactsPath)\obj\</BaseIntermediateOutputPath>
     </PropertyGroup>
 </Project>
