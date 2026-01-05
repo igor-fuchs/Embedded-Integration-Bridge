@@ -1,7 +1,8 @@
 namespace Bridge.Application.Services;
 
-using Bridge.Domain.Abstractions;
+using Bridge.Domain.Interfaces;
 using Bridge.Domain.Constants;
+using Bridge.Domain.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -58,9 +59,9 @@ public sealed class OpcUaMonitoringService : BackgroundService
         await base.StopAsync(cancellationToken);
     }
 
-    private void OnValueChanged(string nodeId, object? value, DateTime timestamp)
+    private void OnValueChanged(OpcNodeValue nodeValue)
     {
         _logger.LogInformation("{Timestamp:HH:mm:ss} | {NodeId} => {Value}",
-            timestamp, nodeId, value);
+            nodeValue.Timestamp, nodeValue.NodeId, nodeValue.Value);
     }
 }

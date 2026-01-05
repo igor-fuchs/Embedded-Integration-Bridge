@@ -1,6 +1,6 @@
 namespace Bridge.Infrastructure;
 
-using Bridge.Domain.Abstractions;
+using Bridge.Domain.Interfaces;
 using Bridge.Infrastructure.Configuration;
 using Bridge.Infrastructure.OpcUa;
 using Microsoft.Extensions.DependencyInjection;

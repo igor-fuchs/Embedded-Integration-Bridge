@@ -1,6 +1,7 @@
 namespace Bridge.Infrastructure.OpcUa;
 
-using Bridge.Domain.Abstractions;
+using Bridge.Domain.Interfaces;
+using Bridge.Domain.Models;
 using Bridge.Infrastructure.Configuration;
 using Bridge.Infrastructure.Telemetry;
 using Microsoft.Extensions.Logging;
@@ -20,6 +21,11 @@ public sealed class OpcUaClient : IOpcUaClient
     private Subscription? _subscription;
     private bool _disposed;
 
+    /// <inheritdoc/>
+    public bool IsConnected => _session?.Connected ?? false;
+
+    #region Constructor
+
     public OpcUaClient(
         IOptions<OpcUaClientOptions> options,
         ILogger<OpcUaClient> logger)
@@ -28,9 +34,10 @@ public sealed class OpcUaClient : IOpcUaClient
         _logger = logger;
     }
 
-    /// <inheritdoc/>
-    public bool IsConnected => _session?.Connected ?? false;
+    #endregion
 
+    #region Public Methods
+    
     /// <inheritdoc/>
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
@@ -51,7 +58,7 @@ public sealed class OpcUaClient : IOpcUaClient
     /// <inheritdoc/>
     public async Task SubscribeAsync(
         IEnumerable<string> nodeIds,
-        Action<string, object?, DateTime> onValueChanged,
+        Action<OpcNodeValue> onValueChanged,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -93,6 +100,8 @@ public sealed class OpcUaClient : IOpcUaClient
         await DisconnectAsync();
         _disposed = true;
     }
+
+    #endregion
 
     #region Private Methods
 
@@ -164,7 +173,7 @@ public sealed class OpcUaClient : IOpcUaClient
 
     private async Task<Subscription> CreateSubscriptionAsync(
         IEnumerable<string> nodeIds,
-        Action<string, object?, DateTime> onValueChanged,
+        Action<OpcNodeValue> onValueChanged,
         CancellationToken cancellationToken)
     {
         var subscription = new Subscription(_session!.DefaultSubscription)
@@ -184,7 +193,7 @@ public sealed class OpcUaClient : IOpcUaClient
             {
                 foreach (var value in item.DequeueValues())
                 {
-                    onValueChanged(item.DisplayName, value.Value, DateTime.UtcNow);
+                    onValueChanged(new OpcNodeValue(item.DisplayName, value.Value, DateTime.UtcNow));
                 }
             };
 

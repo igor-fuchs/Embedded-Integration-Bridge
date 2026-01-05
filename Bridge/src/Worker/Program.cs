@@ -3,7 +3,7 @@ using Bridge.Infrastructure;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Add infrastructure services (OPC UA client, etc.)
+// Add infrastructure services
 builder.Services.AddInfrastructure();
 
 // Add hosted services

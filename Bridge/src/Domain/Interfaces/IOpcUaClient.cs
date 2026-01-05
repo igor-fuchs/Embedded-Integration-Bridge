@@ -1,10 +1,17 @@
-namespace Bridge.Domain.Abstractions;
+namespace Bridge.Domain.Interfaces;
+
+using Bridge.Domain.Models;
 
 /// <summary>
 /// Defines the contract for OPC UA client operations.
 /// </summary>
 public interface IOpcUaClient : IAsyncDisposable
 {
+    /// <summary>
+    /// Gets whether the client is currently connected.
+    /// </summary>
+    bool IsConnected { get; }
+
     /// <summary>
     /// Connects to the OPC UA server asynchronously.
     /// </summary>
@@ -19,7 +26,7 @@ public interface IOpcUaClient : IAsyncDisposable
     /// <param name="cancellationToken">Cancellation token.</param>
     Task SubscribeAsync(
         IEnumerable<string> nodeIds,
-        Action<string, object?, DateTime> onValueChanged,
+        Action<OpcNodeValue> onValueChanged,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -27,9 +34,4 @@ public interface IOpcUaClient : IAsyncDisposable
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task DisconnectAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Gets whether the client is currently connected.
-    /// </summary>
-    bool IsConnected { get; }
 }
