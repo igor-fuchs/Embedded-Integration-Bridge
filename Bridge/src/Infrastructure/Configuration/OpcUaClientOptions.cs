@@ -1,5 +1,7 @@
 namespace Bridge.Infrastructure.Configuration;
 
+using System.ComponentModel.DataAnnotations;
+
 /// <summary>
 /// Configuration options for the OPC UA client.
 /// </summary>
@@ -13,35 +15,42 @@ public sealed class OpcUaClientOptions
     /// <summary>
     /// The URL of the OPC UA server.
     /// </summary>
-    public string ServerUrl { get; set; } = "opc.tcp://192.168.1.20:4840";
+    [Required(ErrorMessage = "ServerUrl is required in appsettings.json under OpcUa section")]
+    public required string ServerUrl { get; set; }
 
     /// <summary>
     /// Application name for the OPC UA client.
     /// </summary>
-    public string ApplicationName { get; set; } = "Bridge OPC UA Client";
+    [Required(ErrorMessage = "ApplicationName is required in appsettings.json under OpcUa section")]
+    public required string ApplicationName { get; set; }
 
     /// <summary>
     /// Application URI for the OPC UA client.
     /// </summary>
-    public string ApplicationUri { get; set; } = "urn:BridgeClient";
+    [Required(ErrorMessage = "ApplicationUri is required in appsettings.json under OpcUa section")]
+    public required string ApplicationUri { get; set; }
 
     /// <summary>
     /// Product URI for the OPC UA client.
     /// </summary>
-    public string ProductUri { get; set; } = "Fuchs";
+    [Required(ErrorMessage = "ProductUri is required in appsettings.json under OpcUa section")]
+    public required string ProductUri { get; set; }
 
     /// <summary>
     /// Session timeout in milliseconds.
     /// </summary>
-    public uint SessionTimeout { get; set; } = 60000;
+    [Range(1000, int.MaxValue, ErrorMessage = "SessionTimeout must be at least 1000ms")]
+    public required uint SessionTimeout { get; set; }
 
     /// <summary>
     /// Default session timeout in milliseconds.
     /// </summary>
-    public int DefaultSessionTimeout { get; set; } = 360000;
+    [Range(1000, int.MaxValue, ErrorMessage = "DefaultSessionTimeout must be at least 1000ms")]
+    public required int DefaultSessionTimeout { get; set; }
 
     /// <summary>
     /// Publishing interval for subscriptions in milliseconds.
     /// </summary>
-    public int PublishingInterval { get; set; } = 1000;
+    [Range(100, int.MaxValue, ErrorMessage = "PublishingInterval must be at least 100ms")]
+    public required int PublishingInterval { get; set; }
 }
