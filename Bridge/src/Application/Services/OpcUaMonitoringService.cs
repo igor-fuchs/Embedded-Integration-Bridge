@@ -5,6 +5,7 @@ using Bridge.Domain.Constants;
 using Bridge.Domain.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 /// <summary>
 /// Background service responsible for monitoring OPC UA nodes.
@@ -14,6 +15,7 @@ public sealed class OpcUaMonitoringService : BackgroundService
     private readonly IOpcUaClient _opcUaClient;
     private readonly IApiClient _apiClient;
     private readonly ILogger<OpcUaMonitoringService> _logger;
+    private readonly ConcurrentDictionary<string, bool> _createdNodes = new();
 
     public OpcUaMonitoringService(
         IOpcUaClient opcUaClient,
@@ -31,6 +33,9 @@ public sealed class OpcUaMonitoringService : BackgroundService
 
         try
         {
+            // Load existing nodes from API
+            await LoadExistingNodesAsync(stoppingToken);
+
             await _opcUaClient.ConnectAsync(stoppingToken);
             _logger.LogInformation("Connected to OPC UA server");
 
@@ -62,20 +67,63 @@ public sealed class OpcUaMonitoringService : BackgroundService
         await base.StopAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Loads existing nodes from the API to populate the created nodes cache.
+    /// </summary>
+    private async Task LoadExistingNodesAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("🔄 Loading existing nodes from API...");
+
+        var response = await _apiClient.GetAllNodesAsync(cancellationToken);
+
+        if (response?.Nodes is not null)
+        {
+            foreach (var node in response.Nodes)
+            {
+                _createdNodes[node.Name] = true;
+            }
+
+            _logger.LogInformation("✅ Loaded {Count} existing node(s) from API", response.TotalCount);
+        }
+        else
+        {
+            _logger.LogWarning("⚠️ Could not load existing nodes from API. Will create nodes as needed.");
+        }
+    }
+
     private async void OnValueChanged(OpcNodeValue nodeValue)
     {
         _logger.LogInformation("{Timestamp:HH:mm:ss} | {NodeId} => {Value}",
             nodeValue.Timestamp, nodeValue.NodeId, nodeValue.Value);
 
-        var success = await _apiClient.SendNodeValueAsync(nodeValue);
-        
-        if (success)
+        bool success;
+
+        // Check if node was already created in this session
+        if (_createdNodes.TryGetValue(nodeValue.NodeId, out var isCreated) && isCreated)
         {
-            _logger.LogInformation("✅ Data sent to API for node {NodeId}", nodeValue.NodeId);
+            // Node already exists, update it
+            await _apiClient.UpdateNodeAsync(nodeValue);
+    
         }
         else
         {
-            _logger.LogWarning("❌ Failed to send data to API for node {NodeId}", nodeValue.NodeId);
+            // Try to create the node first
+            success = await _apiClient.CreateNodeAsync(nodeValue);
+            
+            if (success)
+            {
+                _createdNodes[nodeValue.NodeId] = true;
+            }
+            else
+            {
+                // Creation failed, try to update (node might already exist in the server)
+                success = await _apiClient.UpdateNodeAsync(nodeValue);
+                
+                if (success)
+                {
+                    _createdNodes[nodeValue.NodeId] = true;
+                }
+            }
         }
     }
 }
