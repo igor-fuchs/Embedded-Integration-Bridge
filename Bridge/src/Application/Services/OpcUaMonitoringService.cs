@@ -12,13 +12,16 @@ using Microsoft.Extensions.Logging;
 public sealed class OpcUaMonitoringService : BackgroundService
 {
     private readonly IOpcUaClient _opcUaClient;
+    private readonly IApiClient _apiClient;
     private readonly ILogger<OpcUaMonitoringService> _logger;
 
     public OpcUaMonitoringService(
         IOpcUaClient opcUaClient,
+        IApiClient apiClient,
         ILogger<OpcUaMonitoringService> logger)
     {
         _opcUaClient = opcUaClient;
+        _apiClient = apiClient;
         _logger = logger;
     }
 
@@ -59,9 +62,20 @@ public sealed class OpcUaMonitoringService : BackgroundService
         await base.StopAsync(cancellationToken);
     }
 
-    private void OnValueChanged(OpcNodeValue nodeValue)
+    private async void OnValueChanged(OpcNodeValue nodeValue)
     {
         _logger.LogInformation("{Timestamp:HH:mm:ss} | {NodeId} => {Value}",
             nodeValue.Timestamp, nodeValue.NodeId, nodeValue.Value);
+
+        var success = await _apiClient.SendNodeValueAsync(nodeValue);
+        
+        if (success)
+        {
+            _logger.LogInformation("✅ Data sent to API for node {NodeId}", nodeValue.NodeId);
+        }
+        else
+        {
+            _logger.LogWarning("❌ Failed to send data to API for node {NodeId}", nodeValue.NodeId);
+        }
     }
 }
