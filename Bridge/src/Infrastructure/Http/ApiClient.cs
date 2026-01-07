@@ -47,22 +47,23 @@ public sealed class ApiClient : IApiClient
                 return true;
             }
 
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogWarning(
-                "❌ Failed to send node value to API. NodeId: {NodeId}\n   - StatusCode: {StatusCode}\n   - Response: {Response}",
+                "❌ Failed to create node. NodeId: {NodeId}, StatusCode: {StatusCode}, Response: {Response}",
                 nodeValue.NodeId,
                 response.StatusCode,
-                response.Content.ReadAsStringAsync(cancellationToken).Result);
+                responseContent);
 
             return false;
         }
         catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            _logger.LogInformation("⏸️ Request cancelled for node {NodeId}", nodeValue.NodeId);
+            _logger.LogDebug("⏸️ Request cancelled for node {NodeId}", nodeValue.NodeId);
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Error sending node value to API: {NodeId}", nodeValue.NodeId);
+            _logger.LogError(ex, "❌ Error creating node: {NodeId}", nodeValue.NodeId);
             return false;
         }
     }
@@ -87,22 +88,23 @@ public sealed class ApiClient : IApiClient
                 return true;
             }
 
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogWarning(
-                "❌ Failed to update node value to API. NodeId: {NodeId}\n   - StatusCode: {StatusCode}\n   - Response: {Response}",
+                "❌ Failed to update node. NodeId: {NodeId}, StatusCode: {StatusCode}, Response: {Response}",
                 nodeValue.NodeId,
                 response.StatusCode,
-                response.Content.ReadAsStringAsync(cancellationToken).Result);
+                responseContent);
 
             return false;
         }
         catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            _logger.LogInformation("⏸️ Request cancelled for node {NodeId}", nodeValue.NodeId);
+            _logger.LogDebug("⏸️ Request cancelled for node {NodeId}", nodeValue.NodeId);
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Error sending node value to API: {NodeId}", nodeValue.NodeId);
+            _logger.LogError(ex, "❌ Error updating node: {NodeId}", nodeValue.NodeId);
             return false;
         }
     }
@@ -132,7 +134,7 @@ public sealed class ApiClient : IApiClient
         }
         catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            _logger.LogInformation("⏸️ Request cancelled for retrieving nodes");
+            _logger.LogDebug("⏸️ Request cancelled for retrieving nodes");
             throw;
         }
         catch (Exception ex)
@@ -140,5 +142,24 @@ public sealed class ApiClient : IApiClient
             _logger.LogError(ex, "❌ Error retrieving nodes from API");
             return null;
         }
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> SendOrUpdateNodeAsync(OpcNodeValue nodeValue, bool nodeExists, CancellationToken cancellationToken = default)
+    {
+        if (nodeExists)
+        {
+            return await UpdateNodeAsync(nodeValue, cancellationToken);
+        }
+
+        // Try to create the node first
+        var created = await CreateNodeAsync(nodeValue, cancellationToken);
+        if (created)
+        {
+            return true;
+        }
+
+        // Creation failed (node might already exist), try to update
+        return await UpdateNodeAsync(nodeValue, cancellationToken);
     }
 }   

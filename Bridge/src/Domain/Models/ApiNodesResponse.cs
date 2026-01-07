@@ -19,21 +19,3 @@ public sealed class ApiNodesResponse
     [JsonPropertyName("totalCount")]
     public int TotalCount { get; set; }
 }
-
-/// <summary>
-/// Represents a node from the API response.
-/// </summary>
-public sealed class ApiNode
-{
-    /// <summary>
-    /// The node identifier (NodeId).
-    /// </summary>
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// The node value.
-    /// </summary>
-    [JsonPropertyName("value")]
-    public object? Value { get; set; }
-}

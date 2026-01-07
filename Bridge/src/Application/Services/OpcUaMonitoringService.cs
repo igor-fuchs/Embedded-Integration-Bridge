@@ -15,7 +15,7 @@ public sealed class OpcUaMonitoringService : BackgroundService
     private readonly IOpcUaClient _opcUaClient;
     private readonly IApiClient _apiClient;
     private readonly ILogger<OpcUaMonitoringService> _logger;
-    private readonly ConcurrentDictionary<string, bool> _createdNodes = new();
+    private readonly ConcurrentDictionary<string, bool> _knownNodes = new();
 
     public OpcUaMonitoringService(
         IOpcUaClient opcUaClient,
@@ -68,7 +68,7 @@ public sealed class OpcUaMonitoringService : BackgroundService
     }
 
     /// <summary>
-    /// Loads existing nodes from the API to populate the created nodes cache.
+    /// Loads existing nodes from the API to populate the known nodes cache.
     /// </summary>
     private async Task LoadExistingNodesAsync(CancellationToken cancellationToken)
     {
@@ -80,50 +80,27 @@ public sealed class OpcUaMonitoringService : BackgroundService
         {
             foreach (var node in response.Nodes)
             {
-                _createdNodes[node.Name] = true;
+                _knownNodes[node.Name] = true;
             }
-
-            _logger.LogInformation("✅ Loaded {Count} existing node(s) from API", response.TotalCount);
-        }
-        else
-        {
-            _logger.LogWarning("⚠️ Could not load existing nodes from API. Will create nodes as needed.");
         }
     }
 
+    /// <summary>
+    /// Handles value changes from OPC UA nodes.
+    /// Note: This is async void because it's an event handler callback.
+    /// All exceptions are caught and logged to prevent crashes.
+    /// </summary>
     private async void OnValueChanged(OpcNodeValue nodeValue)
     {
-        _logger.LogInformation("{Timestamp:HH:mm:ss} | {NodeId} => {Value}",
+        _logger.LogDebug("{Timestamp:HH:mm:ss} | {NodeId} => {Value}",
             nodeValue.Timestamp, nodeValue.NodeId, nodeValue.Value);
 
-        bool success;
+        var nodeExists = _knownNodes.ContainsKey(nodeValue.NodeId);
+        var success = await _apiClient.SendOrUpdateNodeAsync(nodeValue, nodeExists);
 
-        // Check if node was already created in this session
-        if (_createdNodes.TryGetValue(nodeValue.NodeId, out var isCreated) && isCreated)
+        if (success)
         {
-            // Node already exists, update it
-            await _apiClient.UpdateNodeAsync(nodeValue);
-    
-        }
-        else
-        {
-            // Try to create the node first
-            success = await _apiClient.CreateNodeAsync(nodeValue);
-            
-            if (success)
-            {
-                _createdNodes[nodeValue.NodeId] = true;
-            }
-            else
-            {
-                // Creation failed, try to update (node might already exist in the server)
-                success = await _apiClient.UpdateNodeAsync(nodeValue);
-                
-                if (success)
-                {
-                    _createdNodes[nodeValue.NodeId] = true;
-                }
-            }
+            _knownNodes[nodeValue.NodeId] = true;
         }
     }
 }
