@@ -29,6 +29,7 @@ public static class OpcNodes
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""ROBOT_FB"".""GoToHome""",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""ROBOT_FB"".""GoToAntDrop""",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""ROBOT_FB"".""GoToPreDrop""",
+        @"ns=3;s=""ST005_BUFFER_FB_IDB"".""ROBOT_FB"".""TurnOnGrab""",
 
         // ST007 - Buffer Station
         @"ns=3;s=""ST007_BUFFER_SHM"".""CONVEYOR_SHM"".""STATUS"".""RUNNING""",
@@ -50,6 +51,7 @@ public static class OpcNodes
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""ROBOT_FB"".""GoToHome""",
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""ROBOT_FB"".""GoToAntDrop""",
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""ROBOT_FB"".""GoToPreDrop""",
+        @"ns=3;s=""ST007_BUFFER_FB_IDB"".""ROBOT_FB"".""TurnOnGrab""",
 
         // ST010 - Separator Station
         @"ns=3;s=""ST010_SEPARATOR_SHM"".""ENTRY_SENSOR_SHM"".""ON""",
