@@ -1,3 +1,4 @@
+using Bridge.Application;
 using Bridge.Application.Services;
 using Bridge.Infrastructure;
 
@@ -5,6 +6,9 @@ var builder = Host.CreateApplicationBuilder(args);
 
 // Add infrastructure services
 builder.Services.AddInfrastructure();
+
+// Add application services
+builder.Services.AddApplication();
 
 // Add hosted services
 builder.Services.AddHostedService<OpcUaMonitoringService>();

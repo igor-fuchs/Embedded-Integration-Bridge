@@ -23,11 +23,11 @@ public sealed class ApiClient : IApiClient
         ILogger<ApiClient> logger,
         IOptions<ApiClientOptions> options)
     {
-        _logger = logger;
         _httpClient = new HttpClientWrapper(
             httpClient,
             logger,
             options.Value.BaseUrl);
+        _logger = logger;
     }
 
     /// <inheritdoc />
@@ -66,7 +66,7 @@ public sealed class ApiClient : IApiClient
     public async Task<Result<RegisteredNodesResponse>> GetRegisteredNodesAsync(CancellationToken cancellationToken = default)
     {
         var result = await _httpClient.GetAsync<RegisteredNodesResponse>(
-            ApiEndpoints.OpcUaNodes.GetAll,
+            ApiEndpoints.OpcUaNodes.GetRegisteredNodes,
             cancellationToken);
 
         if (result.IsSuccess)

@@ -10,12 +10,12 @@ public static class ApiEndpoints
     /// </summary>
     public static class OpcUaNodes
     {
-        private const string Base = "opc-ua/nodes";
+        private const string Base = "api/opcua-nodes";
 
         /// <summary>
         /// Gets all nodes endpoint.
         /// </summary>
-        public static string GetAll => Base;
+        public static string GetRegisteredNodes => Base;
 
         /// <summary>
         /// Gets a specific node by name endpoint.

@@ -1,6 +1,7 @@
 namespace Bridge.Infrastructure;
 
 using Bridge.Domain.Interfaces;
+using Bridge.Infrastructure.Caching;
 using Bridge.Infrastructure.Configuration;
 using Bridge.Infrastructure.Http.Client;
 using Bridge.Infrastructure.OpcUa.Client;
@@ -37,6 +38,9 @@ public static class DependencyInjection
             var options = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<ApiClientOptions>>().Value;
             client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
         });
+
+        // Caching
+        services.AddSingleton<IRegisteredNodeCache, RegisteredNodeCache>();
 
         return services;
     }
