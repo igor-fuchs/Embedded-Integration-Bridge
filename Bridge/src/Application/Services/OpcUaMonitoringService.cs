@@ -96,9 +96,7 @@ public sealed class OpcUaMonitoringService : BackgroundService
             return [];
         }
 
-        var nodeNames = result.Value.Nodes
-            .Select(n => n.Name)
-            .ToList();
+        var nodeNames = result.Value.NodeNames;
 
         _logger.LogInformation("✅ Retrieved {Count} node names to monitor", nodeNames.Count);
 

@@ -53,4 +53,9 @@ public sealed class OpcUaClientOptions
     /// </summary>
     [Range(100, int.MaxValue, ErrorMessage = "PublishingInterval must be at least 100ms")]
     public required int PublishingInterval { get; set; }
+
+    /// <summary>
+    /// Retry policy options for connection attempts.
+    /// </summary>
+    public RetryOptions Retry { get; set; } = new();
 }

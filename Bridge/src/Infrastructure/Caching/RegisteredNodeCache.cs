@@ -45,6 +45,12 @@ public sealed class RegisteredNodeCache : IRegisteredNodeCache
             return;
         }
 
+        if (result.Value.TotalCount == 0)
+        {
+            _logger.LogInformation("ℹ️ No registered nodes found in API.");
+            return;
+        }
+
         foreach (var node in result.Value.Nodes)
         {
             _cache[node.Name] = true;
