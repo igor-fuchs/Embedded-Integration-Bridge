@@ -91,4 +91,4 @@ public sealed class ApiClient : IApiClient
 
         return result;
     }
-}   
+}
