@@ -26,10 +26,10 @@ public sealed record CreateNodeRequest
 public sealed record UpdateNodeRequest
 {
     /// <summary>
-    /// The node identifier (NodeId).
+    /// The node identifier (NodeId). Used in the URL, not serialized to JSON.
     /// </summary>
     [JsonIgnore]
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// The new node value.

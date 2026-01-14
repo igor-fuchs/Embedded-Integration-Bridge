@@ -1,5 +1,6 @@
 namespace Bridge.Infrastructure.Caching;
 
+using Bridge.Domain.Common;
 using Bridge.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;

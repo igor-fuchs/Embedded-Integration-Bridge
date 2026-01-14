@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 /// <param name="Nodes">List of nodes returned by the API.</param>
 /// <param name="TotalCount">Total count of nodes.</param>
 public sealed record RegisteredNodesResponse(
-    [property: JsonPropertyName("nodesName")] IReadOnlyList<NodeDTO> Nodes,
+    [property: JsonPropertyName("nodes")] IReadOnlyList<NodeDTO> Nodes,
     [property: JsonPropertyName("totalCount")] int TotalCount
 );
 
