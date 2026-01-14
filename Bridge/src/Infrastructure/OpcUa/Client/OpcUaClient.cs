@@ -1,9 +1,9 @@
-namespace Bridge.Infrastructure.OpcUa;
+namespace Bridge.Infrastructure.OpcUa.Client;
 
+using Bridge.Domain.DTOs;
 using Bridge.Domain.Interfaces;
-using Bridge.Domain.Models;
 using Bridge.Infrastructure.Configuration;
-using Bridge.Infrastructure.Telemetry;
+using Bridge.Infrastructure.OpcUa.Telemetry;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Opc.Ua;
@@ -58,7 +58,7 @@ public sealed class OpcUaClient : IOpcUaClient
     /// <inheritdoc/>
     public async Task SubscribeAsync(
         IEnumerable<string> nodeIds,
-        Action<OpcNodeValue> onValueChanged,
+        Action<NodeDTO> onValueChanged,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -173,7 +173,7 @@ public sealed class OpcUaClient : IOpcUaClient
 
     private async Task<Subscription> CreateSubscriptionAsync(
         IEnumerable<string> nodeIds,
-        Action<OpcNodeValue> onValueChanged,
+        Action<NodeDTO> onValueChanged,
         CancellationToken cancellationToken)
     {
         var subscription = new Subscription(_session!.DefaultSubscription)
@@ -193,7 +193,7 @@ public sealed class OpcUaClient : IOpcUaClient
             {
                 foreach (var value in item.DequeueValues())
                 {
-                    onValueChanged(new OpcNodeValue(item.DisplayName, value.Value, DateTime.UtcNow));
+                    onValueChanged(new NodeDTO(item.DisplayName, value.Value));
                 }
             };
 

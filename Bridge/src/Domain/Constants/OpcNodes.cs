@@ -15,11 +15,10 @@ public static class OpcNodes
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""EMITTER_FB"".""NextIsGreen""",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""EMITTER_FB"".""NextIsBlue""",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""EMITTER_FB"".""NextIsMetal""",
-        @"ns=3;s=""ST005_BUFFER_FB_IDB"".""EMITTER_FB"".""R_TRIG_PartCreated"".Q",
+        @"ns=3;s=""ST005_BUFFER_SHM"".""EMITTER_SHM"".""SENSOR_STATUS",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""EMITTER_FB"".""EnablePart"".""Green""",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""EMITTER_FB"".""EnablePart"".""Blue""",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""EMITTER_FB"".""EnablePart"".""Metal""",
-        @"ns=3;s=""ST005_BUFFER_SHM"".""SENSOR_SHM"".""ON""",
         @"ns=3;s=""ST005_BUFFER_SHM"".""ROBOT_SHM"".""STATUS"".""HOME_POSITION""",
         @"ns=3;s=""ST005_BUFFER_SHM"".""ROBOT_SHM"".""STATUS"".""DROP_POSITION""",
         @"ns=3;s=""ST005_BUFFER_SHM"".""ROBOT_SHM"".""STATUS"".""PICK_POSITION""",
@@ -30,6 +29,7 @@ public static class OpcNodes
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""ROBOT_FB"".""GoToAntDrop""",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""ROBOT_FB"".""GoToPreDrop""",
         @"ns=3;s=""ST005_BUFFER_FB_IDB"".""ROBOT_FB"".""TurnOnGrab""",
+        @"ns=3;s=""ST005_BUFFER_SHM"".""SENSOR_SHM"".""ON""",
 
         // ST007 - Buffer Station
         @"ns=3;s=""ST007_BUFFER_SHM"".""CONVEYOR_SHM"".""STATUS"".""RUNNING""",
@@ -37,7 +37,6 @@ public static class OpcNodes
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""EMITTER_FB"".""NextIsGreen""",
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""EMITTER_FB"".""NextIsBlue""",
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""EMITTER_FB"".""NextIsMetal""",
-        @"ns=3;s=""ST007_BUFFER_FB_IDB"".""EMITTER_FB"".""R_TRIG_PartCreated"".Q",
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""EMITTER_FB"".""EnablePart"".""Green""",
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""EMITTER_FB"".""EnablePart"".""Blue""",
         @"ns=3;s=""ST007_BUFFER_FB_IDB"".""EMITTER_FB"".""EnablePart"".""Metal""",

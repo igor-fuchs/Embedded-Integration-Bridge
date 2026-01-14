@@ -1,4 +1,4 @@
-namespace Bridge.Infrastructure.Http;
+namespace Bridge.Infrastructure.Http.Client;
 
 using Bridge.Domain.Common;
 using Bridge.Domain.DTOs.Requests;

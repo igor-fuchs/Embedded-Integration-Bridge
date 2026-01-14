@@ -1,6 +1,6 @@
-namespace Bridge.Domain.Interfaces;
+using Bridge.Domain.DTOs;
 
-using Bridge.Domain.Models;
+namespace Bridge.Domain.Interfaces;
 
 /// <summary>
 /// Defines the contract for OPC UA client operations.
@@ -22,11 +22,11 @@ public interface IOpcUaClient : IAsyncDisposable
     /// Creates a subscription for the specified node IDs.
     /// </summary>
     /// <param name="nodeIds">List of node IDs to monitor.</param>
-    /// <param name="onValueChanged">Callback for value changes.</param>
+    /// <param name="onValueChanged">Callback for value changes with node name and value.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task SubscribeAsync(
         IEnumerable<string> nodeIds,
-        Action<OpcNodeValue> onValueChanged,
+        Action<NodeDTO> onValueChanged,
         CancellationToken cancellationToken = default);
 
     /// <summary>

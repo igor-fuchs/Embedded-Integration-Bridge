@@ -1,4 +1,4 @@
-namespace Bridge.Infrastructure.Telemetry;
+namespace Bridge.Infrastructure.OpcUa.Telemetry;
 
 using System.Diagnostics;
 using System.Diagnostics.Metrics;

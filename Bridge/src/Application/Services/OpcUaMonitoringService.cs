@@ -2,10 +2,9 @@ namespace Bridge.Application.Services;
 
 using Bridge.Domain.Interfaces;
 using Bridge.Domain.Constants;
-using Bridge.Domain.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
+using Bridge.Domain.DTOs;
 
 /// <summary>
 /// Background service responsible for monitoring OPC UA nodes.
@@ -15,7 +14,6 @@ public sealed class OpcUaMonitoringService : BackgroundService
     private readonly IOpcUaClient _opcUaClient;
     private readonly IApiClient _apiClient;
     private readonly ILogger<OpcUaMonitoringService> _logger;
-    private readonly ConcurrentDictionary<string, bool> _knownNodes = new();
 
     public OpcUaMonitoringService(
         IOpcUaClient opcUaClient,
@@ -74,14 +72,15 @@ public sealed class OpcUaMonitoringService : BackgroundService
     {
         _logger.LogInformation("🔄 Loading existing nodes from API...");
 
-        var response = await _apiClient.GetAllNodesAsync(cancellationToken);
+        var result = await _apiClient.GetRegisteredNodesAsync(cancellationToken);
 
-        if (response?.Nodes is not null)
+        if (result.IsSuccess)
         {
-            foreach (var node in response.Nodes)
-            {
-                _knownNodes[node.Name] = true;
-            }
+            _logger.LogInformation("✅ Loaded {Count} existing nodes", result.Value.TotalCount);
+        }
+        else
+        {
+            _logger.LogWarning("⚠️ Failed to load existing nodes: {Error}", result.Error.Description);
         }
     }
 
@@ -90,17 +89,8 @@ public sealed class OpcUaMonitoringService : BackgroundService
     /// Note: This is async void because it's an event handler callback.
     /// All exceptions are caught and logged to prevent crashes.
     /// </summary>
-    private async void OnValueChanged(OpcNodeValue nodeValue)
+    private async void OnValueChanged(NodeDTO node)
     {
-        _logger.LogDebug("{Timestamp:HH:mm:ss} | {NodeId} => {Value}",
-            nodeValue.Timestamp, nodeValue.NodeId, nodeValue.Value);
-
-        var nodeExists = _knownNodes.ContainsKey(nodeValue.NodeId);
-        var success = await _apiClient.SendOrUpdateNodeAsync(nodeValue, nodeExists);
-
-        if (success)
-        {
-            _knownNodes[nodeValue.NodeId] = true;
-        }
+        _logger.LogDebug("{NodeId} => {Value}", node.Name, node.Value);
     }
 }
