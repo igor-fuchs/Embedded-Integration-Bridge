@@ -38,4 +38,11 @@ public interface IApiClient
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Result containing node names or error details.</returns>
     Task<Result<NodeNamesResponse>> GetNodeNamesAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets command nodes from the commands-front endpoint.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Result containing command nodes or error details.</returns>
+    Task<Result<CommandNodesResponse>> GetCommandNodesAsync(CancellationToken cancellationToken = default);
 }

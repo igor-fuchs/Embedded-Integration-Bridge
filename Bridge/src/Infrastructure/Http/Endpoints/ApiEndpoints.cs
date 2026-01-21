@@ -41,5 +41,10 @@ public static class ApiEndpoints
         /// Gets all node names endpoint.
         /// </summary>
         public static string GetNames => $"{Base}/node-names";
+
+        /// <summary>
+        /// Gets command nodes from front-end endpoint.
+        /// </summary>
+        public static string GetCommandsFront => $"{Base}/commands-front";
     }
 }

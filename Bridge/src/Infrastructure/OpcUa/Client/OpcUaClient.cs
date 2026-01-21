@@ -3,13 +3,14 @@ namespace Bridge.Infrastructure.OpcUa.Client;
 using Bridge.Domain.DTOs;
 using Bridge.Domain.Exceptions;
 using Bridge.Domain.Interfaces;
-using Bridge.Infrastructure.Configuration;
+using Bridge.Domain.Options;
 using Bridge.Infrastructure.OpcUa.Telemetry;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Opc.Ua;
 using Opc.Ua.Client;
 using System.Diagnostics;
+using System.Text.Json;
 
 /// <summary>
 /// OPC UA client implementation for connecting to and monitoring OPC UA servers.
@@ -101,6 +102,65 @@ public sealed class OpcUaClient : IOpcUaClient
         }
 
         _logger.LogInformation("Disconnected from OPC UA server");
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> WriteNodeValueAsync(string nodeId, object? value, CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (_session is null || !_session.Connected)
+        {
+            throw new OpcUaNotConnectedException();
+        }
+
+        try
+        {
+            var opcNodeId = new NodeId(nodeId);
+
+            // Read the node's data type to ensure proper conversion
+            var dataTypeId = await ReadNodeDataTypeAsync(opcNodeId, cancellationToken);
+
+            // Convert JsonElement to primitive type if necessary
+            var convertedValue = ConvertJsonElement(value);
+
+            // Convert to the expected OPC UA data type
+            var typedValue = ConvertToExpectedType(convertedValue, dataTypeId);
+
+            var nodesToWrite = new WriteValueCollection
+            {
+                new WriteValue
+                {
+                    NodeId = opcNodeId,
+                    AttributeId = Attributes.Value,
+                    Value = new DataValue(new Variant(typedValue))
+                }
+            };
+
+            var response = await _session.WriteAsync(
+                null,
+                nodesToWrite,
+                cancellationToken);
+
+            var statusCode = response.Results[0];
+            
+            if (StatusCode.IsGood(statusCode))
+            {
+                _logger.LogDebug("✅ Successfully wrote value to node {NodeId}", nodeId);
+                return true;
+            }
+
+            _logger.LogWarning(
+                "⚠️ Failed to write value to node {NodeId}. Status: {Status}",
+                nodeId,
+                statusCode);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ Error writing value to node {NodeId}", nodeId);
+            return false;
+        }
     }
 
     /// <inheritdoc/>
@@ -338,6 +398,134 @@ public sealed class OpcUaClient : IOpcUaClient
         await subscription.CreateAsync(cancellationToken);
 
         return subscription;
+    }
+
+    #endregion
+
+    #region Private Methods - Value Conversion
+
+    /// <summary>
+    /// Reads the data type of a node from the OPC UA server.
+    /// </summary>
+    /// <param name="nodeId">The node ID to read the data type from.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The NodeId of the data type.</returns>
+    private async Task<NodeId> ReadNodeDataTypeAsync(NodeId nodeId, CancellationToken cancellationToken)
+    {
+        var nodesToRead = new ReadValueIdCollection
+        {
+            new ReadValueId
+            {
+                NodeId = nodeId,
+                AttributeId = Attributes.DataType
+            }
+        };
+
+        var response = await _session!.ReadAsync(
+            null,
+            0,
+            TimestampsToReturn.Neither,
+            nodesToRead,
+            cancellationToken);
+
+        if (StatusCode.IsGood(response.Results[0].StatusCode) && 
+            response.Results[0].Value is NodeId dataTypeNodeId)
+        {
+            return dataTypeNodeId;
+        }
+
+        _logger.LogWarning("Could not read data type for node {NodeId}, using default", nodeId);
+        return DataTypeIds.BaseDataType;
+    }
+
+    /// <summary>
+    /// Converts a value to the expected OPC UA data type.
+    /// </summary>
+    /// <param name="value">The value to convert.</param>
+    /// <param name="dataTypeId">The expected data type NodeId.</param>
+    /// <returns>The converted value.</returns>
+    private object? ConvertToExpectedType(object? value, NodeId dataTypeId)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+
+        // Map OPC UA data type IDs to conversion logic
+        var typeId = dataTypeId.Identifier as uint? ?? 0;
+
+        return typeId switch
+        {
+            // Boolean (1)
+            1 => Convert.ToBoolean(value),
+            
+            // SByte (2)
+            2 => Convert.ToSByte(value),
+            
+            // Byte (3)
+            3 => Convert.ToByte(value),
+            
+            // Int16 (4)
+            4 => Convert.ToInt16(value),
+            
+            // UInt16 (5)
+            5 => Convert.ToUInt16(value),
+            
+            // Int32 (6)
+            6 => Convert.ToInt32(value),
+            
+            // UInt32 (7)
+            7 => Convert.ToUInt32(value),
+            
+            // Int64 (8)
+            8 => Convert.ToInt64(value),
+            
+            // UInt64 (9)
+            9 => Convert.ToUInt64(value),
+            
+            // Float (10)
+            10 => Convert.ToSingle(value),
+            
+            // Double (11)
+            11 => Convert.ToDouble(value),
+            
+            // String (12)
+            12 => Convert.ToString(value),
+            
+            // DateTime (13)
+            13 => Convert.ToDateTime(value),
+            
+            // Default: return as-is
+            _ => value
+        };
+    }
+
+    /// <summary>
+    /// Converts a JsonElement to its corresponding .NET primitive type.
+    /// This is necessary because JSON deserialization creates JsonElement objects
+    /// which cannot be directly stored in OPC UA Variant objects.
+    /// </summary>
+    /// <param name="value">The value to convert.</param>
+    /// <returns>The converted primitive value or the original value if not a JsonElement.</returns>
+    private static object? ConvertJsonElement(object? value)
+    {
+        if (value is not JsonElement jsonElement)
+        {
+            return value;
+        }
+
+        return jsonElement.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Number when jsonElement.TryGetInt32(out var intValue) => intValue,
+            JsonValueKind.Number when jsonElement.TryGetInt64(out var longValue) => longValue,
+            JsonValueKind.Number when jsonElement.TryGetDouble(out var doubleValue) => doubleValue,
+            JsonValueKind.String => jsonElement.GetString(),
+            JsonValueKind.Null => null,
+            JsonValueKind.Undefined => null,
+            _ => jsonElement.GetRawText()
+        };
     }
 
     #endregion

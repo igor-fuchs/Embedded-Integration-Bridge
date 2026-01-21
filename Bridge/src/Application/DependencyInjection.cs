@@ -1,7 +1,9 @@
 namespace Bridge.Application;
 
 using Bridge.Application.Handlers;
+using Bridge.Application.Services;
 using Bridge.Domain.Interfaces;
+using Bridge.Domain.Options;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -18,6 +20,16 @@ public static class DependencyInjection
     {
         // Handlers
         services.AddSingleton<INodeValueChangedHandler, NodeValueChangedHandler>();
+
+        // Command Polling Configuration
+        services.AddOptions<CommandPollingOptions>()
+            .BindConfiguration(CommandPollingOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Command Services
+        services.AddSingleton<ICommandNodeService, CommandNodeService>();
+        services.AddHostedService<CommandNodePollingService>();
 
         return services;
     }

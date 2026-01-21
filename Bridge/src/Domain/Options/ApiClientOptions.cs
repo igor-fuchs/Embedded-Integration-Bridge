@@ -1,4 +1,4 @@
-namespace Bridge.Infrastructure.Configuration;
+namespace Bridge.Domain.Options;
 
 using System.ComponentModel.DataAnnotations;
 

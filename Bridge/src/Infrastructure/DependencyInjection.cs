@@ -2,7 +2,7 @@ namespace Bridge.Infrastructure;
 
 using Bridge.Domain.Interfaces;
 using Bridge.Infrastructure.Caching;
-using Bridge.Infrastructure.Configuration;
+using Bridge.Domain.Options;
 using Bridge.Infrastructure.Http.Client;
 using Bridge.Infrastructure.OpcUa.Client;
 using Microsoft.Extensions.DependencyInjection;

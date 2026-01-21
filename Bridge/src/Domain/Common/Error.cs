@@ -23,6 +23,22 @@ public sealed record Error(string Code, string Description)
     /// </summary>
     public static Error Cancelled(string description) =>
         new("Error.Cancelled", description);
+
+    /// <summary>
+    /// Creates a validation error.
+    /// </summary>
+    /// <param name="code">The error code.</param>
+    /// <param name="description">The error description.</param>
+    public static Error Validation(string code, string description) =>
+        new(code, description);
+
+    /// <summary>
+    /// Creates a failure error.
+    /// </summary>
+    /// <param name="code">The error code.</param>
+    /// <param name="description">The error description.</param>
+    public static Error Failure(string code, string description) =>
+        new(code, description);
 }
 
 /// <summary>

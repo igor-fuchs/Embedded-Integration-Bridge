@@ -34,4 +34,13 @@ public interface IOpcUaClient : IAsyncDisposable
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
     Task DisconnectAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Writes a value to a specific OPC UA node.
+    /// </summary>
+    /// <param name="nodeId">The node ID to write to.</param>
+    /// <param name="value">The value to write.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if the write was successful, false otherwise.</returns>
+    Task<bool> WriteNodeValueAsync(string nodeId, object? value, CancellationToken cancellationToken = default);
 }

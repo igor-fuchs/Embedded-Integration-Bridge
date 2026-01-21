@@ -1,10 +1,11 @@
 namespace Bridge.Infrastructure.Http.Client;
 
 using Bridge.Domain.Common;
+using Bridge.Domain.DTOs;
 using Bridge.Domain.DTOs.Requests;
 using Bridge.Domain.DTOs.Responses;
 using Bridge.Domain.Interfaces;
-using Bridge.Infrastructure.Configuration;
+using Bridge.Domain.Options;
 using Bridge.Infrastructure.Http.Abstractions;
 using Bridge.Infrastructure.Http.Endpoints;
 using Microsoft.Extensions.Logging;
@@ -87,6 +88,21 @@ public sealed class ApiClient : IApiClient
         if (result.IsSuccess)
         {
             _logger.LogDebug("Retrieved {Count} node names", result.Value.TotalCount);
+        }
+
+        return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<CommandNodesResponse>> GetCommandNodesAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await _httpClient.GetAsync<CommandNodesResponse>(
+            ApiEndpoints.OpcUaNodes.GetCommandsFront,
+            cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            _logger.LogDebug("Retrieved {Count} command nodes", result.Value.Commands.Count);
         }
 
         return result;
