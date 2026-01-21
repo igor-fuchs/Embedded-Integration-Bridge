@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.378.65" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.1" />
+  </ItemGroup>
+</Project>
